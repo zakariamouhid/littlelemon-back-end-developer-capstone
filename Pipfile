@@ -7,6 +7,8 @@ name = "pypi"
 django = "~=4.2.0"
 mysqlclient = "*"
 djangorestframework = "*"
+djangorestframework-xml = "*"
+djoser = "*"
 
 [dev-packages]
 

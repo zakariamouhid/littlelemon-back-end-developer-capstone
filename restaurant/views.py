@@ -9,10 +9,17 @@ from .serializers import MenuItemSerializer
 from .serializers import BookingSerializer
 from rest_framework import permissions
 from .models import Booking
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-# Create your views here.
 def sayHello(request):
- return HttpResponse('Hello World', content_type='text/plain')
+    return Response({'message': 'Hello World'})
+
+@api_view()
+@permission_classes([IsAuthenticated])
+def secured_view(request):
+    return Response({"message":"This view is protected"})
 
 def index(request):
     return render(request, 'index.html', {})
