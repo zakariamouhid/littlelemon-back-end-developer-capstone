@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class MenuItem(models.Model):
     id = models.AutoField(primary_key=True)
@@ -10,6 +11,7 @@ class MenuItem(models.Model):
 
 class Booking(models.Model):
     id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
     name = models.CharField(max_length=255)
     no_of_guests = models.IntegerField()
     booking_date = models.DateTimeField()
