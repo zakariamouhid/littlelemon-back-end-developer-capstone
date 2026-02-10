@@ -118,7 +118,8 @@ littlelemon-back-end-developer-capstone/
 │   ├── admin.py          # Admin configuration
 │   ├── apps.py           # App configuration
 │   ├── urls.py           # App URL configuration
-│   ├── tests.py          # Unit tests
+│   ├── test_models.py    # Model unit tests
+│   ├── tests.py          # Additional unit tests
 │   ├── migrations/       # Database migrations
 │   ├── templates/        # HTML templates
 │   └── static/           # Static files (CSS, images)
@@ -248,9 +249,74 @@ python manage.py migrate
 
 ### Running Tests
 
+The project includes comprehensive unit tests for both models and API endpoints.
+
+#### Test Coverage
+
+**Model Tests** (`restaurant/test_models.py`):
+- MenuItem model tests:
+  - Creation and field validation
+  - String representation
+  - Decimal price handling
+- Booking model tests:
+  - Creation and field validation
+  - String representation
+  - Various guest count scenarios
+
+**API Endpoint Tests** (`LittleLemonAPI/tests.py`):
+- Menu Items API:
+  - GET, POST, PUT, PATCH, DELETE operations
+  - Invalid data handling
+  - Non-existent resource handling
+- Bookings API:
+  - Authenticated and unauthenticated access
+  - CRUD operations
+  - Authentication requirements
+- Secured View:
+  - Authentication verification
+- User ViewSet:
+  - User listing and retrieval
+  - User creation
+
+#### Running All Tests
+
 ```bash
 python manage.py test
 ```
+
+#### Running Tests with Verbose Output
+
+To see detailed test names and results:
+
+```bash
+python manage.py test --verbosity=2
+```
+
+#### Running Specific Test Suites
+
+```bash
+# Run only model tests
+python manage.py test restaurant.test_models
+
+# Run only API tests
+python manage.py test LittleLemonAPI.tests
+
+# Run a specific test class
+python manage.py test restaurant.test_models.MenuItemTest
+
+# Run a specific test method
+python manage.py test restaurant.test_models.MenuItemTest.test_menu_item_creation
+```
+
+#### Test Database
+
+Django automatically creates a separate test database (prefixed with `test_`) when running tests. This ensures:
+- Your development database is never modified
+- Tests run in isolation
+- Each test starts with a clean database state
+- The test database is automatically destroyed after tests complete
+
+**Note**: All datetime objects in tests use timezone-aware datetimes to avoid warnings.
 
 ### Accessing the Django Admin
 
