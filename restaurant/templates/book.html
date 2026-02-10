@@ -69,6 +69,37 @@
             <button type="submit" id="button" style="margin-top: 1rem;">Login</button>
           </form>
           <div id="login-message" style="margin-top: 1rem;"></div>
+          <p style="margin-top: 1rem;">
+            Don't have an account? 
+            <a href="#" id="show-register-link" style="color: #495E57; text-decoration: underline; cursor: pointer;">Register here</a>
+          </p>
+        </div>
+
+        <!-- Registration Form (shown when not authenticated) -->
+        <div id="register-section" {% if is_authenticated %}style="display: none;"{% else %}style="display: none;"{% endif %}>
+          <h3>Create an Account</h3>
+          <p>Register to make a booking.</p>
+          <form id="register-form">
+            {% csrf_token %}
+            <label for="reg-username">Username:</label>
+            <input type="text" id="reg-username" name="username" required>
+            
+            <label for="reg-email" style="margin-top: 1rem;">Email:</label>
+            <input type="email" id="reg-email" name="email" required>
+            
+            <label for="reg-password" style="margin-top: 1rem;">Password:</label>
+            <input type="password" id="reg-password" name="password" required>
+            
+            <label for="reg-password-confirm" style="margin-top: 1rem;">Confirm Password:</label>
+            <input type="password" id="reg-password-confirm" name="password_confirm" required>
+            
+            <button type="submit" id="button" style="margin-top: 1rem;">Register</button>
+          </form>
+          <div id="register-message" style="margin-top: 1rem;"></div>
+          <p style="margin-top: 1rem;">
+            Already have an account? 
+            <a href="#" id="show-login-link" style="color: #495E57; text-decoration: underline; cursor: pointer;">Login here</a>
+          </p>
         </div>
 
         <!-- Booking Form (shown when authenticated) -->
@@ -114,6 +145,129 @@
 
     <script>
       let authToken = '{{ auth_token|default:"" }}';
+      
+      // Toggle between login and registration forms
+      document.getElementById('show-register-link')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('register-section').style.display = 'block';
+      });
+      
+      document.getElementById('show-login-link')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('register-section').style.display = 'none';
+        document.getElementById('login-section').style.display = 'block';
+      });
+      
+      // Handle registration form submission
+      document.getElementById('register-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const messageDiv = document.getElementById('register-message');
+        messageDiv.innerHTML = '';
+        messageDiv.style.color = '';
+        
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+        const passwordConfirm = document.getElementById('reg-password-confirm').value;
+        
+        // Validate passwords match
+        if (password !== passwordConfirm) {
+          messageDiv.innerHTML = '<p style="color: red;">Passwords do not match.</p>';
+          return;
+        }
+        
+        // Validate password length
+        if (password.length < 8) {
+          messageDiv.innerHTML = '<p style="color: red;">Password must be at least 8 characters long.</p>';
+          return;
+        }
+        
+        try {
+          // Get CSRF token from the registration form
+          const csrfToken = document.querySelector('#register-form [name=csrfmiddlewaretoken]').value;
+          
+          // Register user using Djoser endpoint
+          const response = await fetch('/auth/users/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({
+              username: username,
+              email: email,
+              password: password
+            })
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            let errorMessage = 'Registration failed';
+            if (errorData.username) {
+              errorMessage = errorData.username[0];
+            } else if (errorData.email) {
+              errorMessage = errorData.email[0];
+            } else if (errorData.password) {
+              errorMessage = errorData.password[0];
+            } else if (errorData.non_field_errors) {
+              errorMessage = errorData.non_field_errors[0];
+            } else if (typeof errorData === 'object') {
+              errorMessage = JSON.stringify(errorData);
+            }
+            throw new Error(errorMessage);
+          }
+          
+          const data = await response.json();
+          messageDiv.innerHTML = '<p style="color: green;">Registration successful! Logging you in...</p>';
+          
+          // Automatically log in the user after registration
+          // csrfToken is already declared above, reuse it
+          const formData = new FormData();
+          formData.append('username', username);
+          formData.append('password', password);
+          
+          const loginResponse = await fetch('/api-token-auth/', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrfToken,
+            },
+            body: formData
+          });
+          
+          if (!loginResponse.ok) {
+            throw new Error('Registration successful, but automatic login failed. Please login manually.');
+          }
+          
+          const loginData = await loginResponse.json();
+          authToken = loginData.token;
+          
+          // Store token in session
+          await fetch('/restaurant/book/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+              action: 'store_token',
+              token: authToken
+            })
+          });
+          
+          // Show booking section, hide login/register sections
+          document.getElementById('login-section').style.display = 'none';
+          document.getElementById('register-section').style.display = 'none';
+          document.getElementById('booking-section').style.display = 'block';
+          document.getElementById('my-bookings-section').style.display = 'block';
+          
+          // Load bookings
+          loadBookings();
+          
+        } catch (error) {
+          messageDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        }
+      });
       
       // Handle login form submission
       document.getElementById('login-form')?.addEventListener('submit', async function(e) {
@@ -289,9 +443,11 @@
         
         authToken = '';
         document.getElementById('login-section').style.display = 'block';
+        document.getElementById('register-section').style.display = 'none';
         document.getElementById('booking-section').style.display = 'none';
         document.getElementById('my-bookings-section').style.display = 'none';
         document.getElementById('login-form').reset();
+        document.getElementById('register-form').reset();
       });
       
       // Load bookings on page load if authenticated
