@@ -10,7 +10,7 @@ Little Lemon is a restaurant management backend system built with Django. The pr
 
 - **Django 4.2** - Web framework
 - **Python 3** - Programming language
-- **SQLite** - Development database (can be configured for MySQL/PostgreSQL)
+- **MySQL** - Database (configured for MySQL with mysqlclient)
 - **Pipenv** - Dependency management
 
 ## Prerequisites
@@ -19,6 +19,8 @@ Before you begin, ensure you have the following installed:
 
 - Python 3.x
 - Pipenv (install with `pip install pipenv`)
+- MySQL Server (for database)
+- MySQL client libraries (mysqlclient package will be installed via Pipenv)
 
 ## Installation
 
@@ -61,7 +63,7 @@ Before you begin, ensure you have the following installed:
    ```
 
 3. **Access the application**
-   - API: http://127.0.0.1:8000/
+   - API: http://127.0.0.1:8000/restaurant/
    - Admin panel: http://127.0.0.1:8000/admin/
 
 ## Project Structure
@@ -80,12 +82,25 @@ littlelemon-back-end-developer-capstone/
 │   ├── views.py          # View functions/classes
 │   ├── admin.py          # Admin configuration
 │   ├── apps.py           # App configuration
+│   ├── urls.py           # App URL configuration
+│   ├── tests.py          # Unit tests
 │   └── migrations/       # Database migrations
 ├── manage.py             # Django management script
 ├── Pipfile               # Pipenv dependencies
 ├── Pipfile.lock          # Locked dependencies
+├── TODO.md               # Project TODO list
 └── README.md             # This file
 ```
+
+## Current API Endpoints
+
+- `GET /restaurant/` - Returns "Hello World" (basic test endpoint)
+
+## Planned Features
+
+See `TODO.md` for the current development roadmap. Planned features include:
+- Food ordering API using the Menu API
+- Table booking API for reserving tables on specific dates
 
 ## Development
 
@@ -118,7 +133,30 @@ python manage.py test
 
 ### Database Configuration
 
-The project is currently configured to use SQLite for development. To use MySQL or PostgreSQL, update the `DATABASES` setting in `littlelemon/settings.py`.
+The project is currently configured to use MySQL. The database settings are in `littlelemon/settings.py`:
+
+- **Database Name**: `littlelemon_backend_capstone`
+- **Host**: `127.0.0.1`
+- **Port**: `3306`
+- **User**: `root`
+- **Password**: (empty by default)
+
+**Important**: Make sure MySQL is installed and running on your system before running migrations. You may need to create the database manually:
+
+```sql
+CREATE DATABASE littlelemon_backend_capstone;
+```
+
+To use SQLite for development instead, update the `DATABASES` setting in `littlelemon/settings.py`:
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+```
 
 ### Environment Variables
 
