@@ -9,17 +9,20 @@ Little Lemon is a restaurant management backend system built with Django. The pr
 ## Technologies Used
 
 - **Django 4.2** - Web framework
-- **Python 3** - Programming language
-- **MySQL** - Database (configured for MySQL with mysqlclient)
+- **Python 3.8-3.13** - Programming language (Python 3.13 recommended)
+- **MySQL/MariaDB 10.3+** - Database (configured for MySQL with mysqlclient)
 - **Pipenv** - Dependency management
 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
-- Python 3.x
+- **Python 3.8-3.13** (Python 3.13 recommended)
+  - ⚠️ **Important**: Python 3.14 is NOT supported due to compatibility issues with Django 4.2
+  - Check your Python version: `python --version` or `py --version`
+  - Download Python 3.13 from https://www.python.org/downloads/
 - Pipenv (install with `pip install pipenv`)
-- MySQL Server (for database)
+- MySQL Server 5.7+ or MariaDB 10.3+ (for database)
 - MySQL client libraries (mysqlclient package will be installed via Pipenv)
 
 ## Installation
@@ -30,22 +33,53 @@ Before you begin, ensure you have the following installed:
    cd littlelemon-back-end-developer-capstone
    ```
 
-2. **Install dependencies using Pipenv**
+2. **Verify Python version**
+   ```bash
+   python --version
+   # Should show Python 3.8.x through 3.13.x (NOT 3.14+)
+   ```
+   
+   On Windows, you can also use:
+   ```bash
+   py --list
+   # This shows all installed Python versions
+   ```
+
+3. **Install dependencies using Pipenv**
+   
+   If you have Python 3.13 installed and it's in your PATH:
    ```bash
    pipenv install
    ```
+   
+   If Python 3.13 is installed but not in PATH, specify the full path:
+   ```bash
+   # On Windows, find the path first:
+   py -3.13 -c "import sys; print(sys.executable)"
+   
+   # Then use that path:
+   pipenv install --python "C:\Path\To\Python313\python.exe"
+   ```
+   
+   **Note**: The `Pipfile` specifies `python_version = "3.13"`, but pipenv will use any compatible Python 3.8-3.13 version if 3.13 is not available.
 
-3. **Activate the virtual environment**
+4. **Activate the virtual environment**
    ```bash
    pipenv shell
    ```
 
-4. **Run database migrations**
+5. **Verify the Python version in the virtual environment**
+   ```bash
+   python --version
+   # Should show Python 3.13.x (or 3.8-3.12 if that's what was used)
+   ```
+
+6. **Run database migrations**
    ```bash
    python manage.py migrate
    ```
 
-5. **Create a superuser (optional)**
+7. **Create a superuser (optional)**
    ```bash
    python manage.py createsuperuser
    ```
@@ -167,6 +201,46 @@ For production, consider using environment variables for sensitive settings like
 - API keys
 
 Create a `.env` file in the project root (this file is already in `.gitignore`).
+
+## Troubleshooting
+
+### Python Version Issues
+
+If you encounter the error: `'super' object has no attribute 'dicts'`
+
+This indicates you're using Python 3.14, which is incompatible with Django 4.2. 
+
+**Solution**: 
+1. Install Python 3.13 (or use Python 3.8-3.12 if already installed)
+2. Remove the existing virtual environment:
+   ```bash
+   pipenv --rm
+   # Or manually delete: C:\Users\YourName\.virtualenvs\littlelemon-back-end-developer-capstone-*
+   ```
+3. Create a new virtual environment with Python 3.13:
+   ```bash
+   pipenv install --python "C:\Path\To\Python313\python.exe"
+   ```
+
+### Database Version Issues
+
+If you see: `MariaDB 10.5 or later is required`
+
+Django 4.2 supports MariaDB 10.3+, so this error typically means you're using Django 5.2+ which requires MariaDB 10.5+. Ensure your `Pipfile` specifies `django = "~=4.2.0"`.
+
+### Virtual Environment Issues
+
+If pipenv says it didn't create the virtual environment:
+
+1. Exit the current virtual environment:
+   ```bash
+   deactivate
+   ```
+
+2. Manually remove the virtual environment folder, then recreate it:
+   ```bash
+   pipenv install --python "C:\Path\To\Python313\python.exe"
+   ```
 
 ## Contributing
 
