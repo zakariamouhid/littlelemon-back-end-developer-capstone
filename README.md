@@ -169,7 +169,7 @@ The project is organized into two main Django apps:
   - `/restaurant/` - Homepage
   - `/restaurant/about/` - About page
   - `/restaurant/menu/` - Menu page
-  - `/restaurant/book/` - Table booking page (with authentication support)
+  - `/restaurant/book/` - Table booking page (with user registration, login, and authentication support)
 
 ### `LittleLemonAPI` App
 - **Purpose**: REST API endpoints
@@ -236,6 +236,10 @@ All API endpoints are available under the `/api/` prefix:
 - `GET /restaurant/menu/` - Menu page
 - `GET /restaurant/book/` - Table booking page
   - Supports token-based authentication via session storage
+  - User registration form (for new users)
+  - Login form (for existing users)
+  - Interactive booking form (requires authentication)
+  - View and manage user bookings
   - POST endpoint for token management (`store_token`, `clear_token`)
 
 ## Authentication
@@ -285,6 +289,18 @@ You can also use Djoser for user management:
 The booking page (`/restaurant/book/`) supports token management via session storage:
 - Store token: `POST /restaurant/book/` with `{"action": "store_token", "token": "your_token"}`
 - Clear token: `POST /restaurant/book/` with `{"action": "clear_token"}`
+
+**User Registration on Booking Page**
+
+The booking page (`/restaurant/book/`) includes a user registration form that allows new users to:
+- Create an account with username, email, and password
+- Automatically log in after successful registration
+- Start making bookings immediately
+
+Users can toggle between the login and registration forms. The registration form validates:
+- Password confirmation match
+- Minimum password length (8 characters)
+- Unique username and email (handled by the API)
 
 ## Database Models
 
@@ -612,9 +628,14 @@ The project includes a complete frontend interface with:
 - **About Page** (`/restaurant/about/`): Information about the restaurant
 - **Menu Page** (`/restaurant/menu/`): Display of menu items
 - **Booking Page** (`/restaurant/book/`): Interactive table booking form with:
+  - User registration form (for new users without accounts)
+  - Login form (for existing users)
   - Token-based authentication support
   - Session-based token storage
   - API integration for creating bookings
+  - View and manage user's own bookings
+  - Automatic login after registration
+  - Logout functionality
 
 All pages use Django templates with static file support (CSS, images).
 
