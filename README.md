@@ -1,6 +1,6 @@
-# Little Lemon Backend Developer Capstone
+# Little Lemon Backend Developer Capstone (Coursera Meta Back-End Developer Capstone)
 
-A Django REST API project for the Little Lemon restaurant management system. This is a capstone project for the Meta Front-End Developer course.
+A Django REST API project for the Little Lemon restaurant management system. This is a capstone project for the Coursera **Meta Back-End Developer Capstone** course.
 
 ## Project Overview
 
@@ -23,7 +23,7 @@ Before you begin, ensure you have the following installed:
 - **Python 3.8-3.13** (Python 3.13 recommended)
   - ⚠️ **Important**: Python 3.14 is NOT supported due to compatibility issues with Django 4.2
   - Check your Python version: `python --version` or `py --version`
-  - Download Python 3.13 from https://www.python.org/downloads/
+  - Download Python 3.13 from [python.org downloads](https://www.python.org/downloads/)
 - **Pipenv** (install with `pip install pipenv`)
 - **MySQL Server 5.7+ or MariaDB 10.3+** (for database)
 - **MySQL client libraries** (mysqlclient package will be installed via Pipenv)
@@ -111,9 +111,9 @@ Before you begin, ensure you have the following installed:
    ```
 
 3. **Access the application**
-   - API: http://127.0.0.1:8000/api/
-   - Frontend: http://127.0.0.1:8000/restaurant/
-   - Admin panel: http://127.0.0.1:8000/admin/
+   - API: `http://127.0.0.1:8000/api/`
+   - Frontend: `http://127.0.0.1:8000/restaurant/`
+   - Admin panel: `http://127.0.0.1:8000/admin/`
 
 ## Project Structure
 
@@ -435,7 +435,7 @@ Django automatically creates a separate test database (prefixed with `test_`) wh
    ```
 
 2. Start the development server and navigate to:
-   http://127.0.0.1:8000/admin/
+   `http://127.0.0.1:8000/admin/`
 
 ## Configuration
 
@@ -659,7 +659,7 @@ Key dependencies (see `Pipfile` for complete list):
 
 ## License
 
-This project is part of the Meta Front-End Developer course curriculum.
+This project is part of the Coursera **Meta Back-End Developer Capstone** course curriculum.
 
 ## Support
 
