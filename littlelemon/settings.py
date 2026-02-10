@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-uifxz8a*l3q)t)!_q@qbxnmo%_b3e@s#dhpp#sy+op6gqa-0pg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
 
 # CSRF Trusted Origins - required for Django 4.0+
 CSRF_TRUSTED_ORIGINS = [
@@ -80,7 +80,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'littlelemon.wsgi.application'
+WSGI_APPLICATION = 'littlelemon.wsgi.app'
 
 
 # Database
