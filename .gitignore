@@ -196,3 +196,5 @@ Thumbs.db
 *.backup
 *.tmp
 
+# Local files
+/TODO.md

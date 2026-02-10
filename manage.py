@@ -3,6 +3,10 @@
 import os
 import sys
 
+# Force Python to look in your connector folder for DLLs
+# this is a fix for windows
+if os.name == 'nt':
+    os.add_dll_directory(r"C:\mariadb-connector\lib")
 
 def main():
     """Run administrative tasks."""
