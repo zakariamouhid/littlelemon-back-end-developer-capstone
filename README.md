@@ -97,7 +97,8 @@ Before you begin, ensure you have the following installed:
    ```
 
 3. **Access the application**
-   - API: http://127.0.0.1:8000/restaurant/
+   - API: http://127.0.0.1:8000/api/
+   - Frontend: http://127.0.0.1:8000/restaurant/
    - Admin panel: http://127.0.0.1:8000/admin/
 
 ## Project Structure
@@ -110,15 +111,26 @@ littlelemon-back-end-developer-capstone/
 │   ├── urls.py           # Main URL configuration
 │   ├── wsgi.py           # WSGI configuration
 │   └── asgi.py           # ASGI configuration
-├── restaurant/           # Restaurant app
+├── restaurant/           # Restaurant app (frontend views)
 │   ├── __init__.py
-│   ├── models.py         # Database models
-│   ├── views.py          # View functions/classes
+│   ├── models.py         # Database models (MenuItem, Booking)
+│   ├── views.py          # Frontend view functions
 │   ├── admin.py          # Admin configuration
 │   ├── apps.py           # App configuration
 │   ├── urls.py           # App URL configuration
 │   ├── tests.py          # Unit tests
-│   └── migrations/       # Database migrations
+│   ├── migrations/       # Database migrations
+│   ├── templates/        # HTML templates
+│   └── static/           # Static files (CSS, images)
+├── LittleLemonAPI/       # API app (REST API endpoints)
+│   ├── __init__.py
+│   ├── models.py         # (empty - uses restaurant models)
+│   ├── views.py          # API view classes
+│   ├── serializers.py    # DRF serializers
+│   ├── urls.py           # API URL configuration
+│   ├── admin.py          # Admin configuration
+│   ├── apps.py           # App configuration
+│   └── tests.py          # Unit tests
 ├── manage.py             # Django management script
 ├── Pipfile               # Pipenv dependencies
 ├── Pipfile.lock          # Locked dependencies
@@ -126,15 +138,102 @@ littlelemon-back-end-developer-capstone/
 └── README.md             # This file
 ```
 
-## Current API Endpoints
+## App Architecture
 
-- `GET /restaurant/` - Returns "Hello World" (basic test endpoint)
+The project is organized into two main Django apps:
+
+### `restaurant` App
+- **Purpose**: Frontend views and database models
+- **Contains**: 
+  - Database models (`MenuItem`, `Booking`)
+  - Frontend template rendering (`index.html`)
+  - Static files (CSS, images)
+  - Admin configuration for models
+- **URLs**: `/restaurant/` (frontend homepage)
+
+### `LittleLemonAPI` App
+- **Purpose**: REST API endpoints
+- **Contains**:
+  - API view classes (MenuItemsView, BookingViewSet, UserViewSet, etc.)
+  - DRF serializers (MenuItemSerializer, BookingSerializer, UserSerializer)
+  - API URL routing
+- **URLs**: `/api/` (all API endpoints)
+- **Note**: Uses models from the `restaurant` app
+
+This separation allows for:
+- Clear separation between frontend and API concerns
+- Independent scaling of API and frontend
+- Better code organization and maintainability
+
+## API Endpoints
+
+All API endpoints are available under the `/api/` prefix:
+
+### Menu Items
+- `GET /api/menu-items/` - List all menu items
+- `POST /api/menu-items/` - Create a new menu item
+- `GET /api/menu-items/<id>/` - Retrieve a specific menu item
+- `PUT /api/menu-items/<id>/` - Update a menu item (full update)
+- `PATCH /api/menu-items/<id>/` - Partially update a menu item
+- `DELETE /api/menu-items/<id>/` - Delete a menu item
+
+### Bookings (Tables)
+- `GET /api/tables/` - List all bookings (requires authentication)
+- `POST /api/tables/` - Create a new booking (requires authentication)
+- `GET /api/tables/<id>/` - Retrieve a specific booking (requires authentication)
+- `PUT /api/tables/<id>/` - Update a booking (requires authentication)
+- `PATCH /api/tables/<id>/` - Partially update a booking (requires authentication)
+- `DELETE /api/tables/<id>/` - Delete a booking (requires authentication)
+
+### Users
+- `GET /api/users/` - List all users
+- `POST /api/users/` - Create a new user
+- `GET /api/users/<id>/` - Retrieve a specific user
+- `PUT /api/users/<id>/` - Update a user (full update)
+- `PATCH /api/users/<id>/` - Partially update a user
+- `DELETE /api/users/<id>/` - Delete a user
+
+### Authentication & Security
+- `GET /api/secured-view/` - Protected view (requires authentication)
+- `POST /api-token-auth/` - Obtain authentication token
+- `POST /auth/users/` - User registration (Djoser)
+- `POST /auth/token/login/` - Login and get token (Djoser)
+- `POST /auth/token/logout/` - Logout (Djoser)
+
+### Frontend
+- `GET /restaurant/` - Frontend homepage
+
+## Authentication
+
+The API uses Token Authentication. To access protected endpoints:
+
+1. **Get an authentication token:**
+   ```bash
+   POST /api-token-auth/
+   Content-Type: application/json
+   
+   {
+     "username": "your_username",
+     "password": "your_password"
+   }
+   ```
+
+2. **Use the token in requests:**
+   ```bash
+   Authorization: Token <your_token_here>
+   ```
+
+Alternatively, you can use Djoser for user management:
+- Register: `POST /auth/users/`
+- Login: `POST /auth/token/login/`
+- Logout: `POST /auth/token/logout/`
 
 ## Planned Features
 
-See `TODO.md` for the current development roadmap. Planned features include:
-- Food ordering API using the Menu API
-- Table booking API for reserving tables on specific dates
+See `TODO.md` for the current development roadmap. Additional features may include:
+- Enhanced food ordering functionality
+- Advanced table booking features
+- Order management system
 
 ## Development
 
