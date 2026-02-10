@@ -1,0 +1,304 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Book a Table - Little Lemon</title>
+    <meta name="description" content="Book a table at Little Lemon" />
+    <meta
+      name="author"
+      content="Based in Chicago, Illinois, Little Lemon is a family owned Mediterranean restaurant, focused on traditional recipes served with a modern twist."
+    />
+
+    <!-- Load favicon -->
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="{% static 'img/favicon.ico' %}"
+    />
+
+    <!-- Include your CSS files here -->
+    <link
+      rel="preload"
+      as="style"
+      href="{% static 'css/style.css' %}"
+      onload="this.rel = 'stylesheet'"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Karla&family=Markazi+Text:wght@500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <img src="{% static 'img/logo.png' %}" />
+    </header>
+    <nav>
+      <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+        <li><a href="{% url 'menu' %}">Menu</a></li>
+        <li><a href="{% url 'book' %}">Book</a></li>
+      </ul>
+    </nav>
+    <section>
+      <article>
+        <h2>Book a Table</h2>
+        <p>
+          Reserve your table for an Italian, Greek, and Turkish dining experience.
+        </p>
+        
+        <!-- Login Form (shown when not authenticated) -->
+        <div id="login-section" {% if is_authenticated %}style="display: none;"{% endif %}>
+          <h3>Login Required</h3>
+          <p>Please login to make a booking.</p>
+          <form id="login-form">
+            {% csrf_token %}
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="password" style="margin-top: 1rem;">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit" id="button" style="margin-top: 1rem;">Login</button>
+          </form>
+          <div id="login-message" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Booking Form (shown when authenticated) -->
+        <div id="booking-section" {% if not is_authenticated %}style="display: none;"{% endif %}>
+          <h3>Make a Reservation</h3>
+          <form id="booking-form">
+            {% csrf_token %}
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            
+            <label for="no_of_guests" style="margin-top: 1rem;">Number of Guests:</label>
+            <input type="number" id="no_of_guests" name="no_of_guests" min="1" required>
+            
+            <label for="booking_date" style="margin-top: 1rem;">Date and Time:</label>
+            <input type="datetime-local" id="booking_date" name="booking_date" required>
+            
+            <button type="submit" id="button" style="margin-top: 1rem;">Book Table</button>
+          </form>
+          <div id="booking-message" style="margin-top: 1rem;"></div>
+          
+          <div id="logout-section" style="margin-top: 2rem;">
+            <button type="button" id="logout-button" style="padding: .5rem 1rem; border: 1px solid #495E57; background-color: #EE9972; border-radius: 5px; font-size: 1rem; color: #fff; cursor: pointer;">Logout</button>
+          </div>
+        </div>
+      </article>
+      
+      <!-- My Bookings Section (shown when authenticated) -->
+      <article id="my-bookings-section" {% if not is_authenticated %}style="display: none;"{% endif %}>
+        <h2>My Bookings</h2>
+        <div id="bookings-list">
+          <p>Loading your bookings...</p>
+        </div>
+      </article>
+    </section>
+    <footer>
+      <article>
+        <img src="{% static 'img/logo_footer.png' %}" />
+      </article>
+      <article>
+        <p>Copyright Little Lemon</p>
+      </article>
+    </footer>
+
+    <script>
+      let authToken = '{{ auth_token|default:"" }}';
+      
+      // Handle login form submission
+      document.getElementById('login-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const messageDiv = document.getElementById('login-message');
+        messageDiv.innerHTML = '';
+        messageDiv.style.color = '';
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        try {
+          // Get CSRF token from the form
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+          
+          // Use URLSearchParams for API token auth (DRF's obtain_auth_token expects form-encoded data)
+          const formData = new FormData();
+          formData.append('username', username);
+          formData.append('password', password);
+          
+          const response = await fetch('/api-token-auth/', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrfToken,
+            },
+            body: formData
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Login failed');
+          }
+          
+          const data = await response.json();
+          authToken = data.token;
+          
+          await fetch('/restaurant/book/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+              action: 'store_token',
+              token: authToken
+            })
+          });
+          
+          // Show booking section, hide login section
+          document.getElementById('login-section').style.display = 'none';
+          document.getElementById('booking-section').style.display = 'block';
+          document.getElementById('my-bookings-section').style.display = 'block';
+          
+          // Load bookings
+          loadBookings();
+          
+          messageDiv.innerHTML = '<p style="color: green;">Login successful!</p>';
+        } catch (error) {
+          messageDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        }
+      });
+      
+      // Handle booking form submission
+      document.getElementById('booking-form')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const messageDiv = document.getElementById('booking-message');
+        messageDiv.innerHTML = '';
+        messageDiv.style.color = '';
+        
+        if (!authToken) {
+          messageDiv.innerHTML = '<p style="color: red;">Please login first.</p>';
+          return;
+        }
+        
+        const name = document.getElementById('name').value;
+        const no_of_guests = parseInt(document.getElementById('no_of_guests').value);
+        const booking_date = document.getElementById('booking_date').value;
+        
+        try {
+          const response = await fetch('/api/tables/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Token ${authToken}`
+            },
+            body: JSON.stringify({
+              name: name,
+              no_of_guests: no_of_guests,
+              booking_date: booking_date
+            })
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || JSON.stringify(errorData) || 'Booking failed');
+          }
+          
+          const booking = await response.json();
+          messageDiv.innerHTML = '<p style="color: green;">Booking created successfully!</p>';
+          
+          // Reset form
+          document.getElementById('booking-form').reset();
+          
+          // Reload bookings
+          loadBookings();
+        } catch (error) {
+          messageDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        }
+      });
+      
+      // Load user's bookings
+      async function loadBookings() {
+        if (!authToken) return;
+        
+        const bookingsList = document.getElementById('bookings-list');
+        
+        try {
+          const response = await fetch('/api/tables/', {
+            headers: {
+              'Authorization': `Token ${authToken}`
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch bookings');
+          }
+          
+          const bookings = await response.json();
+          
+          if (bookings.length === 0) {
+            bookingsList.innerHTML = '<p>You have no bookings yet.</p>';
+            return;
+          }
+          
+          let html = '<ul style="list-style: none; padding: 0;">';
+          bookings.forEach(booking => {
+            const date = new Date(booking.booking_date);
+            html += `
+              <li style="border: 1px solid #EDEFEE; padding: 1rem; margin-bottom: 1rem; border-radius: 5px;">
+                <h3 style="margin-top: 0; color: #495E57;">${booking.name}</h3>
+                <p style="margin: 0.5rem 0;">
+                  <strong>Date & Time:</strong> ${date.toLocaleString()}
+                </p>
+                <p style="margin: 0.5rem 0;">
+                  <strong>Number of Guests:</strong> ${booking.no_of_guests}
+                </p>
+              </li>
+            `;
+          });
+          html += '</ul>';
+          
+          bookingsList.innerHTML = html;
+        } catch (error) {
+          console.error('Error loading bookings:', error);
+          bookingsList.innerHTML = '<p style="color: red;">Error loading bookings. Please try again later.</p>';
+        }
+      }
+      
+      // Handle logout
+      document.getElementById('logout-button')?.addEventListener('click', async function() {
+        // Clear token from session
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        await fetch('/restaurant/book/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            action: 'clear_token'
+          })
+        });
+        
+        authToken = '';
+        document.getElementById('login-section').style.display = 'block';
+        document.getElementById('booking-section').style.display = 'none';
+        document.getElementById('my-bookings-section').style.display = 'none';
+        document.getElementById('login-form').reset();
+      });
+      
+      // Load bookings on page load if authenticated
+      {% if is_authenticated %}
+      document.addEventListener('DOMContentLoaded', loadBookings);
+      {% endif %}
+    </script>
+  </body>
+</html>
+
