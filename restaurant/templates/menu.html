@@ -53,7 +53,7 @@
         <p>
           Our menu consists of 12-15 seasonal items based on Italian, Greek, and Turkish culture.
         </p>
-        <div id="menu-items" style="margin-top: 2rem;">
+        <div id="menu" style="margin-top: 2rem;">
           <p>Loading menu items...</p>
         </div>
       </article>
@@ -70,10 +70,10 @@
     <script>
       // Fetch menu items from API
       async function loadMenuItems() {
-        const menuContainer = document.getElementById('menu-items');
+        const menuContainer = document.getElementById('menu');
         
         try {
-          const response = await fetch('/api/menu-items/');
+          const response = await fetch('/api/menu/');
           
           if (!response.ok) {
             throw new Error('Failed to fetch menu items');

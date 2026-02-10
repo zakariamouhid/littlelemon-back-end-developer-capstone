@@ -2,54 +2,54 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
-from restaurant.models import MenuItem, Booking
+from restaurant.models import Menu, Booking
 from datetime import datetime
 
 class MenuItemsAPITest(APITestCase):
     def setUp(self):
         """Set up test data"""
         self.client = APIClient()
-        self.menu_item = MenuItem.objects.create(
+        self.menu_item = Menu.objects.create(
             title="Test Pizza",
             price=15.99,
             inventory=100
         )
     
     def test_get_menu_items(self):
-        """Test GET /api/menu-items/ returns list of items"""
-        response = self.client.get('/api/menu-items/')
+        """Test GET /api/menu/ returns list of items"""
+        response = self.client.get('/api/menu/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['title'], 'Test Pizza')
     
     def test_create_menu_item(self):
-        """Test POST /api/menu-items/ creates a new item"""
+        """Test POST /api/menu/ creates a new item"""
         data = {
             'title': 'New Burger',
             'price': '10.50',
             'inventory': 50
         }
-        response = self.client.post('/api/menu-items/', data, format='json')
+        response = self.client.post('/api/menu/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(MenuItem.objects.count(), 2)
-        self.assertEqual(MenuItem.objects.get(id=response.data['id']).title, 'New Burger')
+        self.assertEqual(Menu.objects.count(), 2)
+        self.assertEqual(Menu.objects.get(id=response.data['id']).title, 'New Burger')
     
     def test_get_single_menu_item(self):
-        """Test GET /api/menu-items/<id>/ returns specific item"""
-        response = self.client.get(f'/api/menu-items/{self.menu_item.id}/')
+        """Test GET /api/menu/<id>/ returns specific item"""
+        response = self.client.get(f'/api/menu/{self.menu_item.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['title'], 'Test Pizza')
         self.assertEqual(response.data['price'], '15.99')
     
     def test_update_menu_item(self):
-        """Test PUT /api/menu-items/<id>/ updates an item"""
+        """Test PUT /api/menu/<id>/ updates an item"""
         data = {
             'title': 'Updated Pizza',
             'price': '18.99',
             'inventory': 80
         }
         response = self.client.put(
-            f'/api/menu-items/{self.menu_item.id}/',
+            f'/api/menu/{self.menu_item.id}/',
             data,
             format='json'
         )
@@ -59,12 +59,12 @@ class MenuItemsAPITest(APITestCase):
         self.assertEqual(float(self.menu_item.price), 18.99)
     
     def test_partial_update_menu_item(self):
-        """Test PATCH /api/menu-items/<id>/ partially updates an item"""
+        """Test PATCH /api/menu/<id>/ partially updates an item"""
         data = {
             'price': '20.00'
         }
         response = self.client.patch(
-            f'/api/menu-items/{self.menu_item.id}/',
+            f'/api/menu/{self.menu_item.id}/',
             data,
             format='json'
         )
@@ -75,24 +75,24 @@ class MenuItemsAPITest(APITestCase):
         self.assertEqual(self.menu_item.title, 'Test Pizza')
     
     def test_delete_menu_item(self):
-        """Test DELETE /api/menu-items/<id>/ deletes an item"""
-        response = self.client.delete(f'/api/menu-items/{self.menu_item.id}/')
+        """Test DELETE /api/menu/<id>/ deletes an item"""
+        response = self.client.delete(f'/api/menu/{self.menu_item.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(MenuItem.objects.count(), 0)
+        self.assertEqual(Menu.objects.count(), 0)
     
     def test_get_nonexistent_menu_item(self):
-        """Test GET /api/menu-items/<id>/ with invalid id returns 404"""
-        response = self.client.get('/api/menu-items/999/')
+        """Test GET /api/menu/<id>/ with invalid id returns 404"""
+        response = self.client.get('/api/menu/999/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     
     def test_create_menu_item_invalid_data(self):
-        """Test POST /api/menu-items/ with invalid data returns 400"""
+        """Test POST /api/menu/ with invalid data returns 400"""
         data = {
             'title': '',  # Empty title should be invalid
             'price': '10.50',
             'inventory': 50
         }
-        response = self.client.post('/api/menu-items/', data, format='json')
+        response = self.client.post('/api/menu/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 class BookingAPITest(APITestCase):
@@ -105,6 +105,7 @@ class BookingAPITest(APITestCase):
         )
         self.client.force_authenticate(user=self.user)
         self.booking = Booking.objects.create(
+            user=self.user,
             name="Test Booking",
             no_of_guests=2,
             booking_date=timezone.make_aware(datetime(2024, 12, 25, 19, 30))

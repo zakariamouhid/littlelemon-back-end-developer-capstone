@@ -127,7 +127,7 @@ littlelemon-back-end-developer-capstone/
 │   └── asgi.py           # ASGI configuration
 ├── restaurant/           # Restaurant app (frontend views)
 │   ├── __init__.py
-│   ├── models.py         # Database models (MenuItem, Booking)
+│   ├── models.py         # Database models (Menu, Booking)
 │   ├── views.py          # Frontend view functions
 │   ├── admin.py          # Admin configuration
 │   ├── apps.py           # App configuration
@@ -160,7 +160,7 @@ The project is organized into two main Django apps:
 ### `restaurant` App
 - **Purpose**: Frontend views and database models
 - **Contains**: 
-  - Database models (`MenuItem`, `Booking`)
+  - Database models (`Menu`, `Booking`)
   - Frontend template rendering (`index.html`, `about.html`, `menu.html`, `book.html`)
   - Static files (CSS, images)
   - Admin configuration for models
@@ -174,8 +174,8 @@ The project is organized into two main Django apps:
 ### `LittleLemonAPI` App
 - **Purpose**: REST API endpoints
 - **Contains**:
-  - API view classes (MenuItemsView, BookingViewSet, UserViewSet, etc.)
-  - DRF serializers (MenuItemSerializer, BookingSerializer, UserSerializer)
+  - API view classes (MenuViewSet, BookingViewSet, UserViewSet, etc.)
+  - DRF serializers (MenuSerializer, BookingSerializer, UserSerializer)
   - API URL routing
 - **URLs**: `/api/` (all API endpoints)
 - **Note**: Uses models from the `restaurant` app
@@ -189,15 +189,15 @@ This separation allows for:
 
 All API endpoints are available under the `/api/` prefix:
 
-### Menu Items
-- `GET /api/menu-items/` - List all menu items
+### Menu
+- `GET /api/menu/` - List all menu items
   - Returns: Array of menu items with `id`, `title`, `price`, `inventory`
-- `POST /api/menu-items/` - Create a new menu item
+- `POST /api/menu/` - Create a new menu item
   - Body: `{"title": "string", "price": "decimal", "inventory": integer}`
-- `GET /api/menu-items/<id>/` - Retrieve a specific menu item
-- `PUT /api/menu-items/<id>/` - Update a menu item (full update)
-- `PATCH /api/menu-items/<id>/` - Partially update a menu item
-- `DELETE /api/menu-items/<id>/` - Delete a menu item
+- `GET /api/menu/<id>/` - Retrieve a specific menu item
+- `PUT /api/menu/<id>/` - Update a menu item (full update)
+- `PATCH /api/menu/<id>/` - Partially update a menu item
+- `DELETE /api/menu/<id>/` - Delete a menu item
 
 **Response Formats**: JSON (default), XML, Browsable API
 
@@ -304,7 +304,7 @@ Users can toggle between the login and registration forms. The registration form
 
 ## Database Models
 
-### MenuItem
+### Menu
 - `id` (AutoField, Primary Key)
 - `title` (CharField, max_length=255)
 - `price` (DecimalField, max_digits=10, decimal_places=2)
@@ -363,7 +363,7 @@ The project includes comprehensive unit tests for both models and API endpoints.
 #### Test Coverage
 
 **Model Tests** (`restaurant/test_models.py`):
-- MenuItem model tests:
+- Menu model tests:
   - Creation and field validation
   - String representation
   - Decimal price handling
@@ -373,7 +373,7 @@ The project includes comprehensive unit tests for both models and API endpoints.
   - Various guest count scenarios
 
 **API Endpoint Tests** (`LittleLemonAPI/tests.py`):
-- Menu Items API:
+- Menu API:
   - GET, POST, PUT, PATCH, DELETE operations
   - Invalid data handling
   - Non-existent resource handling
@@ -411,10 +411,10 @@ python manage.py test restaurant.test_models
 python manage.py test LittleLemonAPI.tests
 
 # Run a specific test class
-python manage.py test restaurant.test_models.MenuItemTest
+python manage.py test restaurant.test_models.MenuTest
 
 # Run a specific test method
-python manage.py test restaurant.test_models.MenuItemTest.test_menu_item_creation
+python manage.py test restaurant.test_models.MenuTest.test_menu_item_creation
 ```
 
 #### Test Database
@@ -576,6 +576,8 @@ If you encounter connection errors:
 
 ### Get Menu Items
 ```json
+GET /api/menu/
+
 [
   {
     "id": 1,

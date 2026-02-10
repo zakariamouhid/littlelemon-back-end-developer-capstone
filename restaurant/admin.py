@@ -2,7 +2,7 @@ from django.contrib import admin
 from . import models
 
 # Register your models here.
-admin.site.register(models.MenuItem)
+admin.site.register(models.Menu)
 
 @admin.register(models.Booking)
 class BookingAdmin(admin.ModelAdmin):

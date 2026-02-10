@@ -1,5 +1,5 @@
 """
-Django management command to populate the MenuItem table with sample data.
+Django management command to populate the Menu table with sample data.
 
 Usage:
     python manage.py populate_menu
@@ -7,12 +7,12 @@ Usage:
 """
 
 from django.core.management.base import BaseCommand
-from restaurant.models import MenuItem
+from restaurant.models import Menu
 from decimal import Decimal
 
 
 class Command(BaseCommand):
-    help = 'Populates the MenuItem table with sample menu items'
+    help = 'Populates the Menu table with sample menu items'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -24,7 +24,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['clear']:
             self.stdout.write('Clearing existing menu items...')
-            MenuItem.objects.all().delete()
+            Menu.objects.all().delete()
             self.stdout.write(self.style.SUCCESS('Cleared all menu items.'))
 
         # Sample menu items based on Mediterranean cuisine
@@ -110,7 +110,7 @@ class Command(BaseCommand):
         updated_count = 0
 
         for item_data in menu_items:
-            item, created = MenuItem.objects.get_or_create(
+            item, created = Menu.objects.get_or_create(
                 title=item_data['title'],
                 defaults={
                     'price': item_data['price'],
@@ -137,7 +137,7 @@ class Command(BaseCommand):
             self.style.SUCCESS(
                 f'\nSuccessfully populated menu! '
                 f'Created: {created_count}, Updated: {updated_count}, '
-                f'Total items: {MenuItem.objects.count()}'
+                f'Total items: {Menu.objects.count()}'
             )
         )
 
